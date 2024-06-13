@@ -53,5 +53,5 @@ resource "aws_lambda_function" "hello_world_lambda" {
   s3_key           = "lambda-package.zip"
   handler          = "index.handler"
   runtime          = "nodejs20.x"
-  role             = aws_iam_role.lambda_role.arn
+  role             = data.aws_iam_role.lambda_role.arn
 }
