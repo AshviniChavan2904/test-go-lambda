@@ -48,8 +48,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: lambda-artifact
-          path: lambda-package.zip
-        working-directory: go-code  
+          path: go-code/lambda-package.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -60,7 +59,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: lambda-artifact
-        working-directory: go-code
 
       - name: Configure AWS Credentials
         env:
