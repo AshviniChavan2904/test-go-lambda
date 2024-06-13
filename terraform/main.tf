@@ -35,7 +35,8 @@ resource "aws_iam_role" "lambda_role" {
   })
   lifecycle {
     ignore_changes = [
-      name,assume_role_policy // Ignore changes to the assume role policy
+      "name",
+      "assume_role_policy" // Ignore changes to the assume role policy
     ]
   }  
 }
