@@ -1,0 +1,102 @@
+name: Build and Deploy Lambda Function
+
+on:
+  workflow_dispatch:
+    inputs:
+      Action:
+        description: Terraform Action to be performed
+        type: choice
+        required: true
+        options:
+        - Plan
+        - Apply
+        - Destroy
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.20'  # Specify the Go version
+
+      - name: Install dependencies
+        run: go mod tidy
+
+      - name: Build the Go Lambda function
+        run: GOOS=linux GOARCH=amd64 go build -o main main.go
+
+      - name: Package the Lambda function
+        run: zip lambda-package.zip main
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: lambda-artifact
+          path: lambda-package.zip
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build  # Ensure the build job completes before deploying
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: lambda-artifact
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2  # Specify your AWS region
+
+      - name: Upload code to S3
+        run: |
+          aws s3 cp lambda-package.zip s3://test-bucket-ashvini/
+
+      - name: Deploy Lambda function
+        run: |
+          aws lambda update-function-code \
+            --function-name my-go-lambda \
+            --s3-bucket your-bucket-name \
+            --s3-key lambda-package.zip
+
+  deploy-tf:
+    steps:
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Initialize Terraform
+        run: terraform init
+        working-directory: ./terraform
+  
+      - name: Apply Terraform configuration
+        if: ${{ github.event.inputs.Action == 'Plan' }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run:  terraform plan 
+        working-directory: ./terraform
+  
+      - name: Apply Terraform configuration
+        if: ${{ github.event.inputs.Action == 'Apply' }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: terraform apply -auto-approve
+        working-directory: ./terraform
+  
+      - name: Destroy Terraform configuration
+        if: ${{ github.event.inputs.Action == 'Destroy' }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: terraform destroy -auto-approve  
+        working-directory: ./terraform                     
