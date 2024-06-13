@@ -53,7 +53,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: deploy-tf  # Ensure the build job completes before deploying
+    # needs: deploy-tf  # Ensure the build job completes before deploying
 
     steps:
       - name: Download artifact
