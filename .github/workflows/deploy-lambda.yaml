@@ -30,7 +30,6 @@ jobs:
           cd go-code
           go mod init mylambda
 
-
       - name: Install AWS Lambda Go SDK dependencies
         run: |
           go get github.com/aws/aws-lambda-go/lambda
