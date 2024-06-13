@@ -72,7 +72,7 @@ jobs:
         run: |
           aws lambda update-function-code \
             --function-name my-go-lambda \
-            --s3-bucket your-bucket-name \
+            --s3-bucket test-bucket-ashvini \
             --s3-key lambda-package.zip
 
   deploy-tf:

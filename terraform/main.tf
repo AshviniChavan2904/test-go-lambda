@@ -53,4 +53,3 @@ resource "aws_lambda_function" "hello_world_lambda" {
   runtime          = "nodejs20.x"
   role             = aws_iam_role.lambda_role.arn
 }
-
