@@ -26,8 +26,9 @@ jobs:
           go-version: '1.20'  # Specify the Go version
 
       - name: Initialize Go modules
-        run: go mod init mylambda
-        working-directory: go-code
+        run: |
+          cd go-code
+          go mod init mylambda
 
 
       - name: Install AWS Lambda Go SDK dependencies
@@ -41,14 +42,13 @@ jobs:
         working-directory: go-code
 
       - name: Package the Lambda function
-        run: zip lambda-package.zip main
-        working-directory: go-code
+        run: zip ../lambda-package.zip main
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: lambda-artifact
-          path: go-code/lambda-package.zip
+          path: lambda-package.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -83,33 +83,36 @@ jobs:
   deploy-tf:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
 
       - name: Initialize Terraform
-        run: terraform init
         working-directory: ./terraform
+        run: terraform init
   
       - name: Apply Terraform configuration
         if: ${{ github.event.inputs.Action == 'Plan' }}
+        working-directory: ./terraform
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run:  terraform plan 
-        working-directory: ./terraform
   
       - name: Apply Terraform configuration
         if: ${{ github.event.inputs.Action == 'Apply' }}
+        working-directory: ./terraform
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: terraform apply -auto-approve
-        working-directory: ./terraform
   
       - name: Destroy Terraform configuration
         if: ${{ github.event.inputs.Action == 'Destroy' }}
+        working-directory: ./terraform
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: terraform destroy -auto-approve  
-        working-directory: ./terraform
