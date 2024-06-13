@@ -53,7 +53,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    # needs: deploy-tf  # Ensure the build job completes before deploying
+    needs: build  # Ensure the build job completes before deploying
 
     steps:
       - name: Download artifact
@@ -81,40 +81,40 @@ jobs:
             --s3-bucket test-bucket-ashvini \
             --s3-key lambda-package.zip
 
-  deploy-tf:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+  # deploy-tf:
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
+  #     - name: Set up Terraform
+  #       uses: hashicorp/setup-terraform@v1
 
-      - name: Initialize Terraform
-        working-directory: ./terraform
-        run: terraform init
+  #     - name: Initialize Terraform
+  #       working-directory: ./terraform
+  #       run: terraform init
   
-      - name: Apply Terraform configuration
-        if: ${{ github.event.inputs.Action == 'Plan' }}
-        working-directory: ./terraform
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run:  terraform plan 
+  #     - name: Apply Terraform configuration
+  #       if: ${{ github.event.inputs.Action == 'Plan' }}
+  #       working-directory: ./terraform
+  #       env:
+  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #       run:  terraform plan 
   
-      - name: Apply Terraform configuration
-        if: ${{ github.event.inputs.Action == 'Apply' }}
-        working-directory: ./terraform
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform apply -auto-approve
+  #     - name: Apply Terraform configuration
+  #       if: ${{ github.event.inputs.Action == 'Apply' }}
+  #       working-directory: ./terraform
+  #       env:
+  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #       run: terraform apply -auto-approve
   
-      - name: Destroy Terraform configuration
-        if: ${{ github.event.inputs.Action == 'Destroy' }}
-        working-directory: ./terraform
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform destroy -auto-approve  
+  #     - name: Destroy Terraform configuration
+  #       if: ${{ github.event.inputs.Action == 'Destroy' }}
+  #       working-directory: ./terraform
+  #       env:
+  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #       run: terraform destroy -auto-approve  
