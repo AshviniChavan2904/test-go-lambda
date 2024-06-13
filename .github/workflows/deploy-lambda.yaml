@@ -41,7 +41,9 @@ jobs:
         working-directory: go-code
 
       - name: Package the Lambda function
-        run: zip lambda-package.zip go-code/main
+        run: |
+          cd go-code
+          zip ../lambda-package.zip * -r
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
