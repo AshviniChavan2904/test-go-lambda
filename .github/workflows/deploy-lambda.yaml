@@ -25,6 +25,14 @@ jobs:
         with:
           go-version: '1.20'  # Specify the Go version
 
+      - name: Initialize Go modules
+        run: go mod init mylambda
+
+      - name: Install AWS Lambda Go SDK dependencies
+        run: |
+          go get github.com/aws/aws-lambda-go/lambda
+          go get github.com/aws/aws-lambda-go/events
+
       - name: Build the Go Lambda function
         run: GOOS=linux GOARCH=amd64 go build -o main main.go
 
@@ -67,6 +75,7 @@ jobs:
 
   deploy-tf:
     runs-on: ubuntu-latest
+    needs: deploy 
     steps:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
