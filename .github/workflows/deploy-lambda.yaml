@@ -25,9 +25,6 @@ jobs:
         with:
           go-version: '1.20'  # Specify the Go version
 
-      - name: Initialize Go modules
-        run: go mod init mylambda
-
       - name: Install AWS Lambda Go SDK dependencies
         run: |
           go get github.com/aws/aws-lambda-go/lambda
@@ -54,15 +51,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: lambda-artifact
-
-      - name: Configure AWS Credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: "us-east-1"
-        run: |
-          mkdir -p ~/.aws &&
-          echo -e "[default]\naws_access_key_id = $AWS_ACCESS_KEY_ID\naws_secret_access_key = $AWS_SECRET_ACCESS_KEY\nregion = $AWS_DEFAULT_REGION" > ~/.aws/credentials
 
       - name: Upload code to S3
         env:
