@@ -20,7 +20,7 @@ data "aws_s3_bucket" "test_bucket" {
 }
 
 data "aws_iam_role" "lambda_role" {
-  name = "an_example_role_name"
+  name = "my-test-role-ashvini"
 }
 
 # resource "aws_iam_role" "lambda_role" {
