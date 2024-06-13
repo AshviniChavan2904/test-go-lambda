@@ -19,27 +19,31 @@ data "aws_s3_bucket" "test_bucket" {
   bucket = "test-bucket-ashvini"
 }
 
-resource "aws_iam_role" "lambda_role" {
-  name = "my-test-role-ashvini"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
-      }
-    ]
-  })
-  lifecycle {
-    ignore_changes = [name]
-  }  
+data "aws_iam_role" "lambda_role" {
+  name = "an_example_role_name"
 }
 
+# resource "aws_iam_role" "lambda_role" {
+#   name = "my-test-role-ashvini"
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Action = "sts:AssumeRole"
+#         Effect = "Allow"
+#         Principal = {
+#           Service = "lambda.amazonaws.com"
+#         }
+#       }
+#     ]
+#   })
+#   lifecycle {
+#     ignore_changes = [name]
+#   }  
+# }
+
 resource "aws_iam_role_policy_attachment" "lambda_policy" {
-  role       = aws_iam_role.lambda_role.name
+  role       = data.aws_iam_role.lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
